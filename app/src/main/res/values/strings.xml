@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PV Calculator</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="more">More options</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="date">Date</string>
+    <string name="month">Month</string>
+    <string name="not_set">Not set</string>
+    <string name="estimated">estimated</string>
+    <string name="description">Description</string>
+    <string name="cost">Cost</string>
+
+    <!-- Tabs -->
+    <string name="tab_overview">Savings</string>
+    <string name="tab_production">Production</string>
+    <string name="tab_bills">Bills</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Overview -->
+    <string name="overview_title">My solar savings</string>
+    <string name="setup_title">Let\'s get started</string>
+    <string name="setup_step_1">Enter what your solar system cost</string>
+    <string name="setup_step_2">Log production from your inverter app (a screenshot works!)</string>
+    <string name="setup_step_3">Add your electricity bills (PDF) for exact prices</string>
+    <string name="setup_button">Set up my system</string>
+    <string name="total_saved">Total saved so far</string>
+    <string name="includes_estimated">Includes %1$s estimated before your first record</string>
+    <string name="paid_off">Paid off! 🎉</string>
+    <string name="recovered_percent">%1$s recovered</string>
+    <string name="of_investment">of %1$s</string>
+    <string name="set_investment_hint">Add the cost of your installation in Settings to see when it pays for itself.</string>
+    <string name="avg_per_month">Average per month</string>
+    <string name="per_year">Per year</string>
+    <string name="payback_period">Payback period</string>
+    <string name="years_value">%1$s years</string>
+    <string name="produced">Produced</string>
+    <string name="per_kwh_saved">%1$s saved</string>
+    <string name="payback_title">When is it paid off?</string>
+    <string name="payback_sentence">Your system should pay for itself in about %1$s years, around %2$s.</string>
+    <string name="payback_sentence_no_date">Your system should pay for itself in about %1$s years.</string>
+    <string name="payback_done">Your investment is already fully recovered. Everything from now on is profit!</string>
+    <string name="payback_not_reached">With the current savings the investment is not recovered within the projection.</string>
+    <string name="remaining_to_recover">%1$s still to recover</string>
+    <string name="legend_savings">Cumulative savings</string>
+    <string name="legend_investment">Investment</string>
+    <string name="year_axis">%1$dy</string>
+    <string name="in_n_years">In %1$d years</string>
+    <string name="lifetime_savings">Total savings</string>
+    <string name="net_profit">Net profit</string>
+    <string name="roi">Return on investment</string>
+    <string name="basis_12_months">Estimate based on your last 12 months, including price increases and panel degradation.</string>
+    <string name="basis_expected">Estimate based on your expected annual production. It gets more accurate with a full year of data.</string>
+    <plurals name="basis_extrapolated">
+        <item quantity="one">Estimate extrapolated from %d month of data. Seasons matter: it gets more accurate with a full year.</item>
+        <item quantity="other">Estimate extrapolated from %d months of data. Seasons matter: it gets more accurate with a full year.</item>
+    </plurals>
+    <string name="monthly_savings">Monthly savings</string>
+    <string name="last_months_total">Total shown: %1$s</string>
+    <string name="month_by_month">Month by month</string>
+    <string name="produced_value">%1$s produced</string>
+    <string name="self_consumed_value">Used %1$s</string>
+    <string name="exported_value">Exported %1$s</string>
+    <string name="exported_est_value">Exported ~%1$s</string>
+    <string name="savings_self_consumption">Saved by using solar energy</string>
+    <string name="export_income">Income from exported energy</string>
+    <string name="price_from_bill">Price per kWh (from bill)</string>
+    <string name="price_default">Price per kWh (default)</string>
+    <string name="bill_paid">Bill paid</string>
+    <string name="without_solar">Without solar you would pay</string>
+    <string name="no_bill_for_month">Add this month\'s bill to use its exact price.</string>
+    <string name="empty_overview_title">No production yet</string>
+    <string name="empty_overview_message">Log how much your panels produce, daily or monthly, and your savings will appear here.</string>
+    <string name="how_it_works">How is this calculated?</string>
+    <string name="how_it_works_text">• Solar energy used at home avoids buying it from the grid, so it saves its price per kWh. The price comes from your bill for that month (amount minus fixed charges, divided by the kWh bought), or from the default in Settings.\n\n• Energy sent to the grid earns the feed-in price. When neither the bill nor the inverter says how much was exported, it is estimated from the self-consumption percentage.\n\n• Energy stored in a battery and used later counts as self-consumed.\n\n• Payback: the yearly savings (last 12 months, or an extrapolation) are projected into the future with the expected price increase and panel degradation, until they cover the total investment, including extras like a battery.</string>
+
+    <!-- Production -->
+    <string name="production_title">Solar production</string>
+    <string name="add_production">Add production</string>
+    <string name="edit_production">Edit production</string>
+    <string name="import_screenshot">Read from screenshot</string>
+    <string name="import_csv">Import CSV file</string>
+    <string name="csv_import_failed">No valid lines found. Use one line per day: date;kWh</string>
+    <plurals name="csv_imported">
+        <item quantity="one">%d day imported</item>
+        <item quantity="other">%d days imported</item>
+    </plurals>
+    <string name="empty_production_title">Log your solar production</string>
+    <string name="empty_production_message">Take a screenshot of your inverter or monitoring app and the values are read automatically. You can also type them in or import a CSV file.</string>
+    <string name="this_month">This month</string>
+    <string name="all_time">All time</string>
+    <string name="whole_month_of">Whole month · %1$s</string>
+    <string name="has_attachment">Attachment</string>
+    <string name="one_day">One day</string>
+    <string name="whole_month">Whole month</string>
+    <string name="energy_produced">Energy produced</string>
+    <string name="energy_exported">Exported to the grid (optional)</string>
+    <string name="energy_exported_hint">If your app shows it. Otherwise it is estimated.</string>
+    <string name="reading_file">Reading the file…</string>
+    <string name="detected_production">Read automatically: %1$s. Please check.</string>
+    <string name="nothing_detected_production">Couldn\'t find the production in this image. Please type it in.</string>
+    <string name="field_production">production %1$s</string>
+    <string name="field_export">export %1$s</string>
+    <string name="attach_screenshot">Attach screenshot</string>
+    <string name="attach_screenshot_hint">A screenshot from your solar app fills in the values for you.</string>
+    <string name="delete_entry_title">Delete entry?</string>
+    <string name="delete_entry_message">This production entry and its attachment will be removed.</string>
+
+    <!-- Bills -->
+    <string name="bills_title">Electricity bills</string>
+    <string name="add_bill">Add bill</string>
+    <string name="edit_bill">Edit bill</string>
+    <string name="import_bill">Import bill (PDF)</string>
+    <string name="attach_bill">Attach bill (PDF or photo)</string>
+    <string name="empty_bills_title">Add your electricity bills</string>
+    <string name="empty_bills_message">Bills tell the app exactly how much you pay per kWh. Import the PDF and the values are filled in automatically.</string>
+    <string name="bills_explainer">Each bill gives the real price per kWh for its month. Tap a bill to edit it.</string>
+    <string name="from_grid_value">%1$s from the grid</string>
+    <string name="bill_month">Month of the bill</string>
+    <string name="bill_amount">Total amount</string>
+    <string name="bill_imported">Energy bought from the grid</string>
+    <string name="bill_imported_hint">kWh consumed shown on the bill</string>
+    <string name="bill_fixed">Fixed charges (optional)</string>
+    <string name="bill_fixed_hint">Power / standing charge that doesn\'t depend on consumption</string>
+    <string name="bill_exported">Energy exported (optional)</string>
+    <string name="bill_exported_hint">kWh sold or injected into the grid, if shown</string>
+    <string name="effective_price">You pay %1$s</string>
+    <string name="detected_bill">Read automatically: %1$s. Please check the values.</string>
+    <string name="nothing_detected_bill">Couldn\'t read values from this file. Please fill them in.</string>
+    <string name="field_month">month</string>
+    <string name="field_amount">amount</string>
+    <string name="field_consumption">consumption</string>
+    <string name="field_fixed">fixed charges</string>
+    <string name="field_exported">exported energy</string>
+    <string name="file_open_failed">Couldn\'t open the file.</string>
+    <string name="delete_bill_title">Delete bill?</string>
+    <string name="delete_bill_message">This bill and its attachment will be removed.</string>
+
+    <!-- Attachments -->
+    <string name="pdf_document">PDF document</string>
+    <string name="image">Image</string>
+    <string name="tap_to_open">Tap to open</string>
+    <string name="remove_attachment">Remove attachment</string>
+    <string name="no_app_to_open">No app found to open this file.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="section_system">Your solar system</string>
+    <string name="investment">Installation cost</string>
+    <string name="investment_hint">Total paid for panels, inverter and installation</string>
+    <string name="add_extra_investment">Add battery or upgrade</string>
+    <string name="extra_investment">Extra investment</string>
+    <string name="extra_investment_hint">E.g. a battery or more panels added later. It counts towards the payback.</string>
+    <string name="battery">Battery</string>
+    <string name="total_investment">Total investment: %1$s</string>
+    <string name="install_date">Installation date</string>
+    <string name="clear_date">Clear date</string>
+    <string name="capacity">Peak power (optional)</string>
+    <string name="expected_production">Expected production (optional)</string>
+    <string name="kwh_per_year">kWh/year</string>
+    <string name="expected_production_hint">From your installer\'s quote. Improves estimates during the first year.</string>
+    <string name="section_prices">Electricity prices</string>
+    <string name="grid_price">Price per kWh you buy</string>
+    <string name="grid_price_hint">Used for months without a bill</string>
+    <string name="feed_in_price">Price per kWh you sell</string>
+    <string name="feed_in_hint">Feed-in tariff for exported energy (0 if you don\'t sell)</string>
+    <string name="self_consumption">Self-consumption</string>
+    <string name="self_consumption_hint">Share of the production used at home. Only used when the export is unknown. A battery usually raises it.</string>
+    <string name="section_projection">Projection</string>
+    <string name="price_increase">Electricity price increase</string>
+    <string name="price_increase_hint">Average yearly increase expected</string>
+    <string name="degradation">Panel degradation</string>
+    <string name="degradation_hint">Panels typically lose 0.4–0.7% per year</string>
+    <string name="percent_per_year" formatted="false">%/year</string>
+    <string name="section_general">General</string>
+    <string name="currency">Currency</string>
+    <string name="section_data">Your data</string>
+    <string name="privacy_note">No account needed. Everything stays on this phone, including your bills and screenshots. Make a backup before changing phones.</string>
+    <string name="export_backup">Save backup</string>
+    <string name="restore_backup">Restore backup</string>
+    <string name="clear_all">Delete all data</string>
+    <string name="clear_all_title">Delete all data?</string>
+    <string name="clear_all_message">All bills, production entries, attachments and settings will be permanently deleted.</string>
+    <string name="backup_saved">Backup saved</string>
+    <string name="backup_failed">Couldn\'t save the backup</string>
+    <string name="restore">Restore</string>
+    <string name="restore_title">Restore backup?</string>
+    <string name="restore_message">Your current data will be replaced with the backup.</string>
+    <string name="restore_done">Backup restored</string>
+    <string name="restore_failed">This file isn\'t a valid backup</string>
+    <string name="section_about">About</string>
+    <string name="about_text">PV Calculator is free and open source. It works offline and never collects your data.</string>
+    <string name="version">Version %1$s</string>
+</resources>
