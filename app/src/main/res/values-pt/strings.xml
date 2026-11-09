@@ -125,6 +125,7 @@
     <string name="bill_fixed_hint">Potência contratada / termo fixo que não depende do consumo</string>
     <string name="bill_exported">Energia injetada (opcional)</string>
     <string name="bill_exported_hint">kWh vendidos ou injetados na rede, se indicado</string>
+    <string name="price_updated_from_bill">Fatura guardada. Preço da eletricidade atualizado para %1$s</string>
     <string name="effective_price">Paga %1$s</string>
     <string name="detected_bill">Lido automaticamente: %1$s. Confirme os valores, por favor.</string>
     <string name="nothing_detected_bill">Não foi possível ler valores deste ficheiro. Preencha-os, por favor.</string>
@@ -160,7 +161,7 @@
     <string name="expected_production_hint">Do orçamento do instalador. Melhora as estimativas durante o primeiro ano.</string>
     <string name="section_prices">Preços da eletricidade</string>
     <string name="grid_price">Preço do kWh que compra</string>
-    <string name="grid_price_hint">Usado nos meses sem fatura</string>
+    <string name="grid_price_hint">Atualizado automaticamente com a última fatura. Usado nos meses sem fatura.</string>
     <string name="feed_in_price">Preço do kWh que vende</string>
     <string name="feed_in_hint">Tarifa de venda da energia injetada (0 se não vende)</string>
     <string name="self_consumption">Autoconsumo</string>

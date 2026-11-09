@@ -83,6 +83,16 @@ object SavingsCalculator {
         return (variable / bill.importedKwh).takeIf { it > 0 }
     }
 
+    /**
+     * The price per kWh of [saved] (rounded to 4 decimals) when it is the most recent bill among
+     * [existing], or null when an older bill was saved or its price can't be derived.
+     */
+    fun priceFromLatestBill(existing: List<Bill>, saved: Bill): Double? {
+        val others = existing.filter { it.id != saved.id && it.month != saved.month }
+        if (others.any { it.month > saved.month }) return null
+        return effectivePrice(saved)?.let { Math.round(it * 10000) / 10000.0 }
+    }
+
     fun monthResults(data: AppData): List<MonthResult> {
         val t = data.tariffs
         val selfShare = (t.selfConsumptionPercent / 100).coerceIn(0.0, 1.0)
