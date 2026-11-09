@@ -40,3 +40,33 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: app/build/outputs/apk/release/*.apk
+
+      # Manual run ("Run workflow" in the Actions tab): publish a release for the app's
+      # current versionName (e.g. v1.1.0) unless that release already exists.
+      - name: Read app version
+        id: version
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' app/build.gradle.kts)
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish release (manual run)
+        if: github.event_name == 'workflow_dispatch' && steps.version.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: PV Calculator ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          body: |
+            Download **app-arm64-v8a-release.apk** for most Android phones, or **app-universal-release.apk** if that one doesn't install.
+            Allow installing from unknown sources when Android asks.
+          files: app/build/outputs/apk/release/*.apk
