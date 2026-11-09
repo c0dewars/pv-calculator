@@ -80,6 +80,10 @@ Requirements: JDK 17+ and the Android SDK (API 35).
 Release builds are signed with your own key when these environment variables are set:
 `PV_KEYSTORE_FILE`, `PV_KEYSTORE_PASSWORD`, `PV_KEY_ALIAS`, `PV_KEY_PASSWORD`. Otherwise they use the debug key.
 
+In GitHub Actions, the key comes from the repository secrets `PV_KEYSTORE_BASE64` (the `.jks` file in base64),
+`PV_KEYSTORE_PASSWORD`, `PV_KEY_ALIAS` and `PV_KEY_PASSWORD`. Every release must be signed with the same key,
+otherwise Android refuses to update an installed app. Keep a backup of the keystore and its password.
+
 ### Project layout
 
 ```
