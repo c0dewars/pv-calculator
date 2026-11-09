@@ -130,6 +130,7 @@
     <string name="bill_fixed_hint">Power / standing charge that doesn\'t depend on consumption</string>
     <string name="bill_exported">Energy exported (optional)</string>
     <string name="bill_exported_hint">kWh sold or injected into the grid, if shown</string>
+    <string name="price_updated_from_bill">Bill saved. Default electricity price updated to %1$s</string>
     <string name="effective_price">You pay %1$s</string>
     <string name="detected_bill">Read automatically: %1$s. Please check the values.</string>
     <string name="nothing_detected_bill">Couldn\'t read values from this file. Please fill them in.</string>
@@ -167,7 +168,7 @@
     <string name="expected_production_hint">From your installer\'s quote. Improves estimates during the first year.</string>
     <string name="section_prices">Electricity prices</string>
     <string name="grid_price">Price per kWh you buy</string>
-    <string name="grid_price_hint">Used for months without a bill</string>
+    <string name="grid_price_hint">Updated automatically from your latest bill. Used for months without a bill.</string>
     <string name="feed_in_price">Price per kWh you sell</string>
     <string name="feed_in_hint">Feed-in tariff for exported energy (0 if you don\'t sell)</string>
     <string name="self_consumption">Self-consumption</string>

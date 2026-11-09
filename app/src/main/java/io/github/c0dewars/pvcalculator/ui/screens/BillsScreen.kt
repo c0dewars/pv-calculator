@@ -76,6 +76,8 @@ private val billMimeTypes = arrayOf("application/pdf", "image/*")
 @Composable
 fun BillsScreen(vm: AppViewModel, data: AppData, fmt: Formatter, snackbar: SnackbarHostState) {
     var dialog by remember { mutableStateOf<BillDialogState?>(null) }
+    val screenScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     ScreenScaffold(
         title = stringResource(R.string.bills_title),
@@ -127,7 +129,12 @@ fun BillsScreen(vm: AppViewModel, data: AppData, fmt: Formatter, snackbar: Snack
     }
 
     dialog?.let { d ->
-        BillEditDialog(vm, d.bill, d.pickFile, fmt, snackbar) { dialog = null }
+        BillEditDialog(
+            vm, d.bill, d.pickFile, fmt, snackbar,
+            onPriceUpdated = { price ->
+                screenScope.launch { snackbar.showSnackbar(context.getString(R.string.price_updated_from_bill, fmt.pricePerKwh(price))) }
+            },
+        ) { dialog = null }
     }
 }
 
@@ -185,6 +192,7 @@ private fun BillEditDialog(
     pickFileOnOpen: Boolean,
     fmt: Formatter,
     snackbar: SnackbarHostState,
+    onPriceUpdated: (Double) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -302,7 +310,7 @@ private fun BillEditDialog(
             TextButton(
                 enabled = valid && !analyzing,
                 onClick = {
-                    vm.saveBill(
+                    val updatedPrice = vm.saveBill(
                         Bill(
                             id = initial?.id ?: DataRepository.newId(),
                             month = month.toString(),
@@ -313,6 +321,7 @@ private fun BillEditDialog(
                             attachment = attachment,
                         ),
                     )
+                    updatedPrice?.let(onPriceUpdated)
                     close(attachment)
                 },
             ) { Text(stringResource(R.string.save)) }

@@ -91,10 +91,22 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun deleteProduction(id: String) = update { d -> d.copy(production = d.production.filter { it.id != id }) }
 
-    fun saveBill(bill: Bill) = update { d ->
-        val others = d.bills.filter { it.id != bill.id && it.month != bill.month }
-        d.copy(bills = (others + bill).sortedBy { it.month })
+    /**
+     * Saves a bill. When it is the most recent bill, its price per kWh also becomes the default
+     * electricity price in Settings, so months without a bill use the latest known price.
+     * Returns the new default price, or null if it was not changed.
+     */
+    fun saveBill(bill: Bill): Double? {
+        val newPrice = latestBillPrice(data.value, bill)
+        update { d ->
+            val others = d.bills.filter { it.id != bill.id && it.month != bill.month }
+            val tariffs = latestBillPrice(d, bill)?.let { d.tariffs.copy(gridPricePerKwh = it) } ?: d.tariffs
+            d.copy(bills = (others + bill).sortedBy { it.month }, tariffs = tariffs)
+        }
+        return newPrice
     }
+
+    private fun latestBillPrice(d: AppData, bill: Bill): Double? = SavingsCalculator.priceFromLatestBill(d.bills, bill)
 
     fun deleteBill(id: String) = update { d -> d.copy(bills = d.bills.filter { it.id != id }) }
 

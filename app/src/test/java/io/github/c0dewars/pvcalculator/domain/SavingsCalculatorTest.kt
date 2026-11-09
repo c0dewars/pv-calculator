@@ -100,6 +100,20 @@ class SavingsCalculatorTest {
     }
 
     @Test
+    fun `latest bill price becomes the default price`() {
+        val sept = Bill("s", "2026-09", importedKwh = 400.0, amount = 90.0, fixedCharges = 17.34)
+        val oct = Bill("o", "2026-10", importedKwh = 503.0, amount = 108.10, fixedCharges = 17.34)
+        // (108.10 - 17.34) / 503 = 0.18044...
+        assertEquals(0.1804, SavingsCalculator.priceFromLatestBill(listOf(sept), oct)!!, 1e-9)
+        // Saving an older bill doesn't change the default price.
+        assertNull(SavingsCalculator.priceFromLatestBill(listOf(oct), sept))
+        // Editing the latest bill updates it.
+        assertEquals(0.1804, SavingsCalculator.priceFromLatestBill(listOf(sept, oct), oct.copy(amount = 108.10))!!, 1e-9)
+        // No consumption: price can't be derived.
+        assertNull(SavingsCalculator.priceFromLatestBill(emptyList(), oct.copy(importedKwh = 0.0)))
+    }
+
+    @Test
     fun `no data and no investment`() {
         val s = SavingsCalculator.summarize(AppData())
         assertNull(s.paybackYears)
