@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: never back up or transfer DeyeCloud credentials. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="deye_credentials.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="deye_credentials.xml" />
+    </device-transfer>
+</data-extraction-rules>

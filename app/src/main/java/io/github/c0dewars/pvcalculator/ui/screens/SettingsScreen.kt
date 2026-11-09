@@ -185,6 +185,9 @@ fun SettingsScreen(vm: AppViewModel, data: AppData, fmt: Formatter, snackbar: Sn
                 )
             }
 
+            // --------------------------------------------------------- DeyeCloud
+            DeyeCloudSection(vm, data, snackbar)
+
             // --------------------------------------------------------- general
             SectionCard(title = stringResource(R.string.section_general), icon = Icons.Rounded.Language) {
                 CurrencyPicker(data.currencyCode ?: AppViewModel.defaultCurrency()) { vm.setCurrency(it) }

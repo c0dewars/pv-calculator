@@ -109,5 +109,9 @@ class ScreenshotTest {
         compose.onNodeWithText("Settings").performClick()
         compose.mainClock.advanceTimeBy(1000)
         save("4-settings")
+
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Connect DeyeCloud"))
+        compose.mainClock.advanceTimeBy(1000)
+        save("5-deye-section")
     }
 }
