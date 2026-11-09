@@ -25,6 +25,8 @@ import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Attachment
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.MoreVert
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.rounded.UploadFile
 import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +71,7 @@ import io.github.c0dewars.pvcalculator.data.AppData
 import io.github.c0dewars.pvcalculator.data.Attachment
 import io.github.c0dewars.pvcalculator.data.DataRepository
 import io.github.c0dewars.pvcalculator.data.ProductionEntry
+import io.github.c0dewars.pvcalculator.domain.DeyeSync
 import io.github.c0dewars.pvcalculator.domain.EnergyCandidate
 import io.github.c0dewars.pvcalculator.domain.SavingsCalculator
 import io.github.c0dewars.pvcalculator.domain.TextParsing
@@ -97,6 +102,7 @@ fun ProductionScreen(vm: AppViewModel, data: AppData, fmt: Formatter, snackbar: 
     var menu by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val deyeSyncing by vm.deyeSyncing.collectAsState()
 
     val csvPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
@@ -112,6 +118,15 @@ fun ProductionScreen(vm: AppViewModel, data: AppData, fmt: Formatter, snackbar: 
         title = stringResource(R.string.production_title),
         snackbar = snackbar,
         actions = {
+            if (data.deye != null) {
+                if (deyeSyncing) {
+                    CircularProgressIndicator(Modifier.padding(12.dp).size(24.dp), strokeWidth = 2.dp)
+                } else {
+                    IconButton(onClick = {
+                        scope.launch { runDeyeSync(vm, snackbar, context) { scope.launch { snackbar.showSnackbar(context.getString(R.string.deye_session_expired)) } } }
+                    }) { Icon(Icons.Rounded.CloudSync, stringResource(R.string.deye_sync_now)) }
+                }
+            }
             IconButton(onClick = { dialog = ProductionDialog.Edit(null, pickFile = true) }) {
                 Icon(Icons.Rounded.AddPhotoAlternate, stringResource(R.string.import_screenshot))
             }
@@ -231,6 +246,17 @@ private fun ProductionRow(e: ProductionEntry, fmt: Formatter, onClick: () -> Uni
                     },
                     style = MaterialTheme.typography.bodyLarge,
                 )
+                if (e.source == DeyeSync.SOURCE) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Rounded.Cloud, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            e.exportedKwh?.let { stringResource(R.string.deye_row, fmt.kwh(it)) } ?: "DeyeCloud",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 if (e.attachment != null) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.Attachment, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)

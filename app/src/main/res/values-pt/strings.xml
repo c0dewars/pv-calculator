@@ -174,7 +174,7 @@
     <string name="section_general">Geral</string>
     <string name="currency">Moeda</string>
     <string name="section_data">Os seus dados</string>
-    <string name="privacy_note">Não precisa de conta. Tudo fica neste telemóvel, incluindo faturas e screenshots. Faça uma cópia de segurança antes de trocar de telemóvel.</string>
+    <string name="privacy_note">Não precisa de conta. Tudo fica neste telemóvel, incluindo faturas e screenshots. A única ligação à internet é a sincronização opcional com a DeyeCloud. Faça uma cópia de segurança antes de trocar de telemóvel.</string>
     <string name="export_backup">Guardar cópia de segurança</string>
     <string name="restore_backup">Restaurar cópia de segurança</string>
     <string name="clear_all">Apagar todos os dados</string>
@@ -188,6 +188,35 @@
     <string name="restore_done">Cópia de segurança restaurada</string>
     <string name="restore_failed">Este ficheiro não é uma cópia de segurança válida</string>
     <string name="section_about">Sobre</string>
-    <string name="about_text">A Calculadora PV é gratuita e de código aberto. Funciona offline e nunca recolhe os seus dados.</string>
+    <string name="about_text">A Calculadora PV é gratuita e de código aberto. Funciona offline (exceto a sincronização opcional com a DeyeCloud) e nunca recolhe os seus dados.</string>
     <string name="version">Versão %1$s</string>
+
+    <!-- DeyeCloud -->
+    <string name="deye_title">DeyeCloud</string>
+    <string name="deye_intro">Tem um inversor Deye? Ligue a sua conta DeyeCloud para importar automaticamente a produção diária e a energia injetada.</string>
+    <string name="deye_connect">Ligar DeyeCloud</string>
+    <string name="deye_connect_button">Ligar</string>
+    <string name="deye_how_to">1. Entre em developer.deyecloud.com com a sua conta DeyeCloud.\n2. Crie uma aplicação para obter o App ID e o App Secret.\n3. Introduza-os abaixo com o seu login DeyeCloud.</string>
+    <string name="deye_open_portal">Abrir portal de programadores DeyeCloud</string>
+    <string name="deye_data_center">Centro de dados</string>
+    <string name="deye_dc_europe">Europa</string>
+    <string name="deye_dc_americas">Américas</string>
+    <string name="deye_dc_india">Índia</string>
+    <string name="deye_login">E-mail ou nome de utilizador</string>
+    <string name="deye_password">Palavra-passe DeyeCloud</string>
+    <string name="deye_privacy">A palavra-passe só é usada para entrar e nunca é guardada. A app comunica apenas com a DeyeCloud.</string>
+    <string name="deye_choose_station">Escolha a sua instalação</string>
+    <string name="deye_no_stations">Não foram encontradas instalações nesta conta DeyeCloud.</string>
+    <string name="deye_last_sync">Última sincronização: %1$s</string>
+    <string name="deye_never_synced">Ainda não sincronizado</string>
+    <string name="deye_sync_now">Sincronizar</string>
+    <string name="deye_disconnect">Desligar</string>
+    <string name="deye_sync_note">Sincroniza automaticamente ao abrir a app. Os dias sincronizados substituem registos manuais dos mesmos dias.</string>
+    <string name="deye_session_expired">A sessão DeyeCloud expirou. Volte a ligar nas Definições.</string>
+    <string name="deye_error">DeyeCloud: %1$s</string>
+    <string name="deye_row">DeyeCloud · injetado %1$s</string>
+    <plurals name="deye_synced">
+        <item quantity="one">%d dia sincronizado da DeyeCloud</item>
+        <item quantity="other">%d dias sincronizados da DeyeCloud</item>
+    </plurals>
 </resources>

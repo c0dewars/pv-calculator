@@ -12,6 +12,20 @@ data class AppData(
     val currencyCode: String? = null,
     val bills: List<Bill> = emptyList(),
     val production: List<ProductionEntry> = emptyList(),
+    /** Link to a DeyeCloud station (secrets such as the app secret and token are stored separately). */
+    val deye: DeyeLink? = null,
+)
+
+@Serializable
+data class DeyeLink(
+    /** Name of [io.github.c0dewars.pvcalculator.domain.DeyeDataCenter]. */
+    val dataCenter: String,
+    val stationId: Long,
+    val stationName: String? = null,
+    /** ISO date-time of the last successful sync. */
+    val lastSync: String? = null,
+    /** Last day (ISO date) included in a sync. */
+    val lastSyncedDay: String? = null,
 )
 
 @Serializable
@@ -91,4 +105,6 @@ data class ProductionEntry(
     /** Energy sent to the grid in the same period, when the monitoring app reports it. */
     val exportedKwh: Double? = null,
     val attachment: Attachment? = null,
+    /** Where the value came from: null for manual entries, "deye" for DeyeCloud sync. */
+    val source: String? = null,
 )

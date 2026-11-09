@@ -181,7 +181,7 @@
     <string name="section_general">General</string>
     <string name="currency">Currency</string>
     <string name="section_data">Your data</string>
-    <string name="privacy_note">No account needed. Everything stays on this phone, including your bills and screenshots. Make a backup before changing phones.</string>
+    <string name="privacy_note">No account needed. Everything stays on this phone, including your bills and screenshots. The only connection is the optional DeyeCloud sync. Make a backup before changing phones.</string>
     <string name="export_backup">Save backup</string>
     <string name="restore_backup">Restore backup</string>
     <string name="clear_all">Delete all data</string>
@@ -195,6 +195,35 @@
     <string name="restore_done">Backup restored</string>
     <string name="restore_failed">This file isn\'t a valid backup</string>
     <string name="section_about">About</string>
-    <string name="about_text">PV Calculator is free and open source. It works offline and never collects your data.</string>
+    <string name="about_text">PV Calculator is free and open source. It works offline (except the optional DeyeCloud sync) and never collects your data.</string>
     <string name="version">Version %1$s</string>
+
+    <!-- DeyeCloud -->
+    <string name="deye_title">DeyeCloud</string>
+    <string name="deye_intro">Have a Deye inverter? Connect your DeyeCloud account to import daily production and grid export automatically.</string>
+    <string name="deye_connect">Connect DeyeCloud</string>
+    <string name="deye_connect_button">Connect</string>
+    <string name="deye_how_to">1. Sign in at developer.deyecloud.com with your DeyeCloud account.\n2. Create an application to get an App ID and App Secret.\n3. Enter them below with your DeyeCloud login.</string>
+    <string name="deye_open_portal">Open DeyeCloud developer portal</string>
+    <string name="deye_data_center">Data center</string>
+    <string name="deye_dc_europe">Europe</string>
+    <string name="deye_dc_americas">Americas</string>
+    <string name="deye_dc_india">India</string>
+    <string name="deye_login">E-mail or username</string>
+    <string name="deye_password">DeyeCloud password</string>
+    <string name="deye_privacy">Your password is only used to sign in and is never stored. The app talks only to DeyeCloud.</string>
+    <string name="deye_choose_station">Choose your station</string>
+    <string name="deye_no_stations">No stations found in this DeyeCloud account.</string>
+    <string name="deye_last_sync">Last sync: %1$s</string>
+    <string name="deye_never_synced">Not synced yet</string>
+    <string name="deye_sync_now">Sync now</string>
+    <string name="deye_disconnect">Disconnect</string>
+    <string name="deye_sync_note">Syncs automatically when you open the app. Synced days replace manual entries for the same days.</string>
+    <string name="deye_session_expired">DeyeCloud session expired. Reconnect in Settings.</string>
+    <string name="deye_error">DeyeCloud: %1$s</string>
+    <string name="deye_row">DeyeCloud · exported %1$s</string>
+    <plurals name="deye_synced">
+        <item quantity="one">%d day synced from DeyeCloud</item>
+        <item quantity="other">%d days synced from DeyeCloud</item>
+    </plurals>
 </resources>

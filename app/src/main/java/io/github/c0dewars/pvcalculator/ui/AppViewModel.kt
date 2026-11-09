@@ -9,6 +9,13 @@ import io.github.c0dewars.pvcalculator.data.AppData
 import io.github.c0dewars.pvcalculator.data.Attachment
 import io.github.c0dewars.pvcalculator.data.Bill
 import io.github.c0dewars.pvcalculator.data.DataRepository
+import io.github.c0dewars.pvcalculator.data.DeyeCloudClient
+import io.github.c0dewars.pvcalculator.data.DeyeCredentials
+import io.github.c0dewars.pvcalculator.data.DeyeLink
+import io.github.c0dewars.pvcalculator.domain.DeyeApiException
+import io.github.c0dewars.pvcalculator.domain.DeyeDataCenter
+import io.github.c0dewars.pvcalculator.domain.DeyeStation
+import io.github.c0dewars.pvcalculator.domain.DeyeSync
 import io.github.c0dewars.pvcalculator.data.DocumentReader
 import io.github.c0dewars.pvcalculator.data.ExtraInvestment
 import io.github.c0dewars.pvcalculator.data.ProductionEntry
@@ -22,6 +29,8 @@ import io.github.c0dewars.pvcalculator.domain.ProductionParser
 import io.github.c0dewars.pvcalculator.domain.SavingsCalculator
 import io.github.c0dewars.pvcalculator.domain.Summary
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -29,6 +38,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Currency
 import java.util.Locale
 
@@ -36,12 +47,28 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = DataRepository.get(app)
     private val reader = DocumentReader(app)
+    private val deyeCredentials = DeyeCredentials(app)
+
+    /** State of the DeyeCloud sync shown in the UI. */
+    private val _deyeSyncing = MutableStateFlow(false)
+    val deyeSyncing: StateFlow<Boolean> = _deyeSyncing
 
     val data: StateFlow<AppData> = repo.data
 
     val summary: StateFlow<Summary> = repo.data
         .map { SavingsCalculator.summarize(it) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, SavingsCalculator.summarize(repo.data.value))
+
+    init {
+        // Keep production up to date automatically (at most every 6 hours, only if connected).
+        viewModelScope.launch {
+            val link = repo.data.value.deye ?: return@launch
+            val last = link.lastSync?.let { runCatching { LocalDateTime.parse(it) }.getOrNull() }
+            if (deyeCredentials.hasValidToken && (last == null || last.isBefore(LocalDateTime.now().minusHours(6)))) {
+                runCatching { syncDeye() }
+            }
+        }
+    }
 
     val currencyCode: String
         get() = data.value.currencyCode ?: defaultCurrency()
@@ -153,6 +180,93 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
             ?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
     }.getOrNull()
+
+    // ------------------------------------------------------------------ DeyeCloud
+
+    val deyeLogin: String? get() = deyeCredentials.login
+    val deyeAppId: String? get() = deyeCredentials.appId
+    val deyeTokenValid: Boolean get() = deyeCredentials.hasValidToken
+
+    /** Logs in and returns the stations of the account. Credentials are saved only if it works. */
+    suspend fun connectDeye(
+        dataCenter: DeyeDataCenter,
+        appId: String,
+        appSecret: String,
+        login: String,
+        password: String,
+    ): List<DeyeStation> {
+        val client = DeyeCloudClient(dataCenter)
+        val token = client.obtainToken(appId, appSecret, login, DeyeSync.sha256(password))
+        val stations = client.stations(token.token!!)
+        deyeCredentials.appId = appId.trim()
+        deyeCredentials.appSecret = appSecret.trim()
+        deyeCredentials.login = login.trim()
+        deyeCredentials.token = token.token
+        deyeCredentials.tokenExpiresAt = System.currentTimeMillis() + token.expiresInSeconds * 1000
+        pendingDataCenter = dataCenter
+        return stations
+    }
+
+    private var pendingDataCenter: DeyeDataCenter? = null
+
+    /** Links the chosen station and imports its history. Returns the number of days imported. */
+    suspend fun selectDeyeStation(station: DeyeStation): Int {
+        val dc = pendingDataCenter ?: data.value.deye?.let { DeyeDataCenter.valueOf(it.dataCenter) } ?: DeyeDataCenter.EUROPE
+        repo.update { d ->
+            d.copy(
+                deye = DeyeLink(dataCenter = dc.name, stationId = station.id, stationName = station.name),
+                system = d.system.copy(
+                    installDate = d.system.installDate ?: station.startDate()?.toString(),
+                    capacityKwp = d.system.capacityKwp ?: station.installedCapacity?.takeIf { it > 0 },
+                ),
+            )
+        }
+        return syncDeye()
+    }
+
+    /** Downloads daily production since the last sync (or since installation). Returns days imported. */
+    suspend fun syncDeye(): Int {
+        val link = data.value.deye ?: throw DeyeApiException("Not connected")
+        val token = deyeCredentials.token?.takeIf { deyeCredentials.hasValidToken } ?: throw DeyeTokenExpired()
+        if (_deyeSyncing.value) return 0
+        _deyeSyncing.value = true
+        try {
+            val client = DeyeCloudClient(DeyeDataCenter.valueOf(link.dataCenter))
+            val today = LocalDate.now()
+            val from = link.lastSyncedDay?.let(SavingsCalculator::parseDate)?.minusDays(2)
+                ?: data.value.system.installDate?.let(SavingsCalculator::parseDate)
+                ?: today.minusMonths(12).withDayOfMonth(1)
+            val items = mutableListOf<io.github.c0dewars.pvcalculator.domain.DeyeDataItem>()
+            DeyeSync.chunks(from, today.plusDays(1)).forEachIndexed { i, (start, end) ->
+                if (i > 0) delay(300) // be gentle with the API rate limits
+                items += client.dailyHistory(token, link.stationId, start, end)
+            }
+            val entries = DeyeSync.toEntries(items)
+            repo.update { d ->
+                d.copy(
+                    production = DeyeSync.merge(d.production, entries),
+                    deye = d.deye?.copy(lastSync = LocalDateTime.now().withNano(0).toString(), lastSyncedDay = today.toString()),
+                )
+            }
+            return entries.size
+        } catch (e: DeyeApiException) {
+            if (e.isAuthError) {
+                deyeCredentials.token = null
+                throw DeyeTokenExpired()
+            }
+            throw e
+        } finally {
+            _deyeSyncing.value = false
+        }
+    }
+
+    /** Removes the link and credentials. Synced production entries are kept. */
+    fun disconnectDeye() {
+        deyeCredentials.clear()
+        update { it.copy(deye = null) }
+    }
+
+    class DeyeTokenExpired : Exception("DeyeCloud session expired")
 
     companion object {
         fun defaultCurrency(): String =
