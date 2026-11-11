@@ -26,6 +26,8 @@ data class DeyeLink(
     val lastSync: String? = null,
     /** Last day (ISO date) included in a sync. */
     val lastSyncedDay: String? = null,
+    /** Serial number of the hybrid inverter, used for battery settings. */
+    val deviceSn: String? = null,
 )
 
 @Serializable

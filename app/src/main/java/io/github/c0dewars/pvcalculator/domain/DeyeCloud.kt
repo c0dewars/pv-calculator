@@ -110,6 +110,12 @@ object DeyeSync {
         explicitNulls = false
     }
 
+    /** For commands sent to the inverter: every field is written explicitly (false included), nulls omitted. */
+    val controlJson = Json {
+        encodeDefaults = true
+        explicitNulls = false
+    }
+
     /** DeyeCloud expects the password hashed with SHA-256, lower-case hex. */
     fun sha256(password: String): String =
         MessageDigest.getInstance("SHA-256").digest(password.toByteArray()).joinToString("") { "%02x".format(it) }

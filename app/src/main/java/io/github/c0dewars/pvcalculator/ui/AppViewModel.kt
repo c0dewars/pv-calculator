@@ -13,6 +13,19 @@ import io.github.c0dewars.pvcalculator.data.DeyeCloudClient
 import io.github.c0dewars.pvcalculator.data.DeyeCredentials
 import io.github.c0dewars.pvcalculator.data.DeyeLink
 import io.github.c0dewars.pvcalculator.domain.DeyeApiException
+import io.github.c0dewars.pvcalculator.domain.DeyeBatteryConfig
+import io.github.c0dewars.pvcalculator.domain.DeyeDynamicConfig
+import io.github.c0dewars.pvcalculator.domain.DeyeOrderStatus
+import io.github.c0dewars.pvcalculator.domain.DeyeStationLatest
+import io.github.c0dewars.pvcalculator.domain.DeyeSystemConfig
+import io.github.c0dewars.pvcalculator.domain.DeyeTouConfig
+import io.github.c0dewars.pvcalculator.domain.TouSlot
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import java.time.DayOfWeek
 import io.github.c0dewars.pvcalculator.domain.DeyeDataCenter
 import io.github.c0dewars.pvcalculator.domain.DeyeStation
 import io.github.c0dewars.pvcalculator.domain.DeyeSync
@@ -279,6 +292,129 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     class DeyeTokenExpired : Exception("DeyeCloud session expired")
+
+    // ------------------------------------------------------------------ inverter & battery
+
+    data class InverterState(
+        val loading: Boolean = false,
+        val errors: List<String> = emptyList(),
+        val deviceSn: String? = null,
+        val latest: DeyeStationLatest? = null,
+        val battery: DeyeBatteryConfig? = null,
+        val system: DeyeSystemConfig? = null,
+        val tou: DeyeTouConfig? = null,
+        /** Full state incl. grid charge on/off; read through a slower asynchronous order. */
+        val dynamic: DeyeDynamicConfig? = null,
+        val dynamicLoading: Boolean = false,
+        val updatedAt: LocalDateTime? = null,
+        val commandRunning: Boolean = false,
+    ) {
+        val gridChargeOn: Boolean? get() = dynamic?.gridChargeAction?.equals("on", ignoreCase = true)
+        val schedule: List<TouSlot> get() = dynamic?.timeUseSettingItems ?: tou?.timeUseSettingItems.orEmpty()
+    }
+
+    private val _inverter = MutableStateFlow(InverterState())
+    val inverter: StateFlow<InverterState> = _inverter
+
+    private fun deyeContext(): Triple<DeyeCloudClient, String, DeyeLink> {
+        val link = data.value.deye ?: throw DeyeApiException("Not connected")
+        val token = deyeCredentials.token?.takeIf { deyeCredentials.hasValidToken } ?: throw DeyeTokenExpired()
+        return Triple(DeyeCloudClient(DeyeDataCenter.valueOf(link.dataCenter)), token, link)
+    }
+
+    private suspend fun inverterSn(client: DeyeCloudClient, token: String, link: DeyeLink): String {
+        link.deviceSn?.let { return it }
+        val devices = client.devices(token, link.stationId)
+        val sn = (devices.firstOrNull { it.deviceType == "INVERTER" } ?: devices.firstOrNull())?.deviceSn
+            ?: throw DeyeApiException("No inverter found in this station")
+        repo.update { d -> d.copy(deye = d.deye?.copy(deviceSn = sn)) }
+        return sn
+    }
+
+    /** Reads live values and the current inverter settings (read-only). */
+    suspend fun refreshInverter(includeDynamic: Boolean = true) {
+        if (_inverter.value.loading) return
+        _inverter.value = _inverter.value.copy(loading = true, errors = emptyList())
+        try {
+            val (client, token, link) = deyeContext()
+            val errors = mutableListOf<String>()
+            suspend fun <T> safe(block: suspend () -> T): T? = try {
+                block()
+            } catch (e: DeyeApiException) {
+                if (e.isAuthError) throw e
+                errors += e.message.orEmpty()
+                null
+            } catch (e: Exception) {
+                errors += e.message ?: e.javaClass.simpleName
+                null
+            }
+            val latest = safe { client.stationLatest(token, link.stationId) }
+            val sn = safe { inverterSn(client, token, link) }
+            val battery = sn?.let { safe { client.batteryConfig(token, it) } }
+            val system = sn?.let { safe { client.systemConfig(token, it) } }
+            val tou = sn?.let { safe { client.touConfig(token, it) } }
+            _inverter.value = _inverter.value.copy(
+                loading = false, errors = errors.distinct(), deviceSn = sn, latest = latest,
+                battery = battery, system = system, tou = tou, updatedAt = LocalDateTime.now(),
+            )
+            if (includeDynamic && sn != null) {
+                _inverter.value = _inverter.value.copy(dynamicLoading = true)
+                val dynamic = runCatching { client.dynamicConfig(token, sn) }.getOrNull()
+                _inverter.value = _inverter.value.copy(dynamicLoading = false, dynamic = dynamic ?: _inverter.value.dynamic)
+            }
+        } catch (e: DeyeApiException) {
+            if (e.isAuthError) deyeCredentials.token = null
+            _inverter.value = _inverter.value.copy(loading = false, dynamicLoading = false)
+            throw if (e.isAuthError) DeyeTokenExpired() else e
+        } catch (e: Exception) {
+            _inverter.value = _inverter.value.copy(loading = false, dynamicLoading = false)
+            throw e
+        }
+    }
+
+    /** Default battery level outside the charging window. */
+    fun defaultBatterySoc(): Int =
+        _inverter.value.battery?.battLowCapacity?.takeIf { it in 5..90 }?.let { maxOf(it, 10) } ?: 20
+
+    /**
+     * Turns grid charging on and sends [plan] as the time-of-use schedule (all days).
+     * Returns the final order status reported by the inverter.
+     */
+    suspend fun startGridCharge(plan: List<TouSlot>, chargeAmpere: Int?): DeyeOrderStatus? =
+        runCommand { client, token, sn ->
+            val fields = buildJsonObject {
+                put("gridChargeAction", "on")
+                chargeAmpere?.let { put("gridChargeAmpere", it) }
+                put("touAction", "on")
+                put("touDays", buildJsonArray { DayOfWeek.entries.forEach { add(it.name) } })
+                put("timeUseSettingItems", DeyeSync.controlJson.encodeToJsonElement(ListSerializer(TouSlot.serializer()), plan))
+            }
+            client.dynamicControl(token, sn, fields)
+        }
+
+    /** Turns grid charging off. The schedule is kept, so solar and battery keep working as before. */
+    suspend fun stopGridCharge(): DeyeOrderStatus? =
+        runCommand { client, token, sn -> client.dynamicControl(token, sn, buildJsonObject { put("gridChargeAction", "off") }) }
+
+    private suspend fun runCommand(send: suspend (DeyeCloudClient, String, String) -> Long): DeyeOrderStatus? {
+        _inverter.value = _inverter.value.copy(commandRunning = true)
+        try {
+            val (client, token, link) = deyeContext()
+            val sn = inverterSn(client, token, link)
+            val orderId = send(client, token, sn)
+            val status = client.waitForOrder(token, orderId)
+            if (status?.succeeded == true) runCatching { refreshInverter() }
+            return status
+        } catch (e: DeyeApiException) {
+            if (e.isAuthError) {
+                deyeCredentials.token = null
+                throw DeyeTokenExpired()
+            }
+            throw e
+        } finally {
+            _inverter.value = _inverter.value.copy(commandRunning = false)
+        }
+    }
 
     companion object {
         fun defaultCurrency(): String =

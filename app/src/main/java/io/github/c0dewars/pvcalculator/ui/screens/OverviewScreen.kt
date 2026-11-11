@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -211,26 +213,32 @@ private fun HeroCard(summary: Summary, fmt: Formatter) {
 
 @Composable
 private fun StatsGrid(summary: Summary, fmt: Formatter) {
+    // Equal-height rows of equal-width tiles: all four tiles end up the same size.
+    val tile = Modifier.fillMaxHeight()
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatTile(
                 Icons.Rounded.Savings, stringResource(R.string.avg_per_month), fmt.money(summary.averageMonthlySavings),
-                PvColors.savings, Modifier.weight(1f),
+                PvColors.savings, tile.weight(1f),
+                caption = if (summary.hasData) {
+                    pluralStringResource(R.plurals.over_n_months, summary.months.size, summary.months.size)
+                } else stringResource(R.string.estimated),
             )
             StatTile(
                 Icons.AutoMirrored.Rounded.TrendingUp, stringResource(R.string.per_year), fmt.moneySmart(summary.estimatedAnnualSavings),
-                PvColors.export, Modifier.weight(1f), caption = stringResource(R.string.estimated),
+                PvColors.export, tile.weight(1f), caption = stringResource(R.string.estimated),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatTile(
                 Icons.Rounded.Timelapse, stringResource(R.string.payback_period),
                 summary.paybackYears?.let { stringResource(R.string.years_value, fmt.years(it)) } ?: "—",
-                PvColors.solar, Modifier.weight(1f),
+                PvColors.solar, tile.weight(1f),
+                caption = summary.paybackDate?.let { fmt.month(java.time.YearMonth.from(it)) },
             )
             StatTile(
                 Icons.Rounded.WbSunny, stringResource(R.string.produced), fmt.kwh(summary.totalProductionKwh),
-                PvColors.solar, Modifier.weight(1f),
+                PvColors.solar, tile.weight(1f),
                 caption = if (summary.hasData) stringResource(R.string.per_kwh_saved, fmt.pricePerKwh(summary.savingsPerKwh)) else null,
             )
         }
