@@ -12,6 +12,8 @@ data class AppData(
     val currencyCode: String? = null,
     val bills: List<Bill> = emptyList(),
     val production: List<ProductionEntry> = emptyList(),
+    /** App theme: "SYSTEM" (follow the phone), "LIGHT" or "DARK". */
+    val themeMode: String = "SYSTEM",
     /** Link to a DeyeCloud station (secrets such as the app secret and token are stored separately). */
     val deye: DeyeLink? = null,
 )

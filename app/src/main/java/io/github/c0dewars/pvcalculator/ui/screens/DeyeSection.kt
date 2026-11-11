@@ -56,6 +56,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.c0dewars.pvcalculator.R
+import io.github.c0dewars.pvcalculator.ui.components.pvSegmentedColors
 import io.github.c0dewars.pvcalculator.data.AppData
 import io.github.c0dewars.pvcalculator.domain.DeyeDataCenter
 import io.github.c0dewars.pvcalculator.domain.DeyeStation
@@ -250,6 +251,7 @@ private fun DeyeConnectDialog(
                             selected = dataCenter == dc,
                             onClick = { dataCenter = dc },
                             shape = SegmentedButtonDefaults.itemShape(i, options.size),
+                        colors = pvSegmentedColors(),
                         ) { Text(stringResource(label), maxLines = 1) }
                     }
                 }

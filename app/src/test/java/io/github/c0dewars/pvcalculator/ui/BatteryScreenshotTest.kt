@@ -44,7 +44,12 @@ class BatteryScreenshotTest {
     val compose = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun batteryCards() {
+    fun batteryCards() = render(dark = false, name = "7-battery")
+
+    @Test
+    fun batteryCardsDark() = render(dark = true, name = "dark-5-battery")
+
+    private fun render(dark: Boolean, name: String) {
         val base = listOf(
             TouSlot("00:00", 5000, 20), TouSlot("04:00", 5000, 20), TouSlot("08:00", 5000, 15),
             TouSlot("12:00", 5000, 15), TouSlot("16:00", 5000, 20), TouSlot("20:00", 5000, 20),
@@ -59,7 +64,7 @@ class BatteryScreenshotTest {
             updatedAt = LocalDateTime.of(2026, 11, 11, 14, 32),
         )
         compose.setContent {
-            PvTheme {
+            PvTheme(darkTheme = dark) {
                 Column(
                     Modifier
                         .fillMaxSize()
@@ -80,6 +85,6 @@ class BatteryScreenshotTest {
         val bmp = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
         view.draw(Canvas(bmp))
         val dir = File(System.getProperty("screenshots.dir") ?: "build/screenshots").apply { mkdirs() }
-        File(dir, "7-battery.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        File(dir, "$name.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 }

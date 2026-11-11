@@ -184,6 +184,10 @@
     <string name="degradation_hint">Panels typically lose 0.4–0.7% per year</string>
     <string name="percent_per_year" formatted="false">%/year</string>
     <string name="section_general">General</string>
+    <string name="theme">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
     <string name="currency">Currency</string>
     <string name="section_data">Your data</string>
     <string name="privacy_note">No account needed. Everything stays on this phone, including your bills and screenshots. The only connection is the optional DeyeCloud sync. Make a backup before changing phones.</string>

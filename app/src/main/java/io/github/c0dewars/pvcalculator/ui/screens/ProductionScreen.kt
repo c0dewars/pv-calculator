@@ -67,6 +67,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.c0dewars.pvcalculator.R
+import io.github.c0dewars.pvcalculator.ui.components.pvSegmentedColors
 import io.github.c0dewars.pvcalculator.data.AppData
 import io.github.c0dewars.pvcalculator.data.Attachment
 import io.github.c0dewars.pvcalculator.data.DataRepository
@@ -348,10 +349,12 @@ private fun ProductionEditDialog(
                     SegmentedButton(
                         selected = !wholeMonth, onClick = { wholeMonth = false },
                         shape = SegmentedButtonDefaults.itemShape(0, 2),
+                        colors = pvSegmentedColors(),
                     ) { Text(stringResource(R.string.one_day)) }
                     SegmentedButton(
                         selected = wholeMonth, onClick = { wholeMonth = true },
                         shape = SegmentedButtonDefaults.itemShape(1, 2),
+                        colors = pvSegmentedColors(),
                     ) { Text(stringResource(R.string.whole_month)) }
                 }
                 if (wholeMonth) {

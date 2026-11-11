@@ -135,6 +135,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         s.copy(extraInvestments = s.extraInvestments.filter { it.id != id })
     }
 
+    fun setThemeMode(mode: String) = update { it.copy(themeMode = mode) }
+
     fun setCurrency(code: String) = update { it.copy(currencyCode = code) }
 
     fun clearAll() {

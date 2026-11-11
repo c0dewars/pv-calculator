@@ -67,7 +67,9 @@ import io.github.c0dewars.pvcalculator.ui.components.SectionCard
 import io.github.c0dewars.pvcalculator.ui.components.SplitBar
 import io.github.c0dewars.pvcalculator.ui.components.StatTile
 import io.github.c0dewars.pvcalculator.ui.theme.PvColors
+import io.github.c0dewars.pvcalculator.ui.theme.LocalDarkTheme
 import io.github.c0dewars.pvcalculator.ui.theme.SunGradient
+import io.github.c0dewars.pvcalculator.ui.theme.SunGradientDark
 
 @Composable
 fun OverviewScreen(
@@ -156,7 +158,7 @@ private fun HeroCard(summary: Summary, fmt: Formatter) {
         Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.extraLarge)
-            .background(SunGradient)
+            .background(if (LocalDarkTheme.current) SunGradientDark else SunGradient)
             .padding(24.dp),
     ) {
         Icon(
