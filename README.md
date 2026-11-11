@@ -13,6 +13,13 @@ to recover your investment. No account, no ads: your data stays on your phone.
   <img src="docs/screenshots/3-bills.png" width="200" alt="Electricity bills" />
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/7-battery.png" width="200" alt="Battery and inverter" />
+  <img src="docs/screenshots/dark-1-overview.png" width="200" alt="Dark mode: savings" />
+  <img src="docs/screenshots/dark-5-battery.png" width="200" alt="Dark mode: battery" />
+  <img src="docs/screenshots/dark-4-settings.png" width="200" alt="Dark mode: appearance setting" />
+</p>
+
 ## Features
 
 - **Monthly savings**: energy you use from your panels saves its price per kWh, and exported energy earns the feed-in tariff.
@@ -28,7 +35,7 @@ to recover your investment. No account, no ads: your data stays on your phone.
 - **CSV import** of daily production (`date;kWh[;exported kWh]`), as exported by most monitoring portals.
 - **Attachments** are kept with each bill/entry and open with one tap.
 - **Backup & restore** to a single `.zip` file (data + attachments).
-- Light and dark theme, any currency, English and Portuguese.
+- Light and dark theme (follow the phone or choose in Settings → Appearance), any currency, English and Portuguese.
 
 ## DeyeCloud sync (Deye inverters)
 

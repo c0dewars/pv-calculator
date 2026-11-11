@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.FileDownload
@@ -40,6 +41,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -59,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.c0dewars.pvcalculator.BuildConfig
 import io.github.c0dewars.pvcalculator.R
+import io.github.c0dewars.pvcalculator.ui.components.pvSegmentedColors
 import io.github.c0dewars.pvcalculator.data.AppData
 import io.github.c0dewars.pvcalculator.data.DataRepository
 import io.github.c0dewars.pvcalculator.data.ExtraInvestment
@@ -72,6 +77,8 @@ import io.github.c0dewars.pvcalculator.ui.components.Formatter
 import io.github.c0dewars.pvcalculator.ui.components.NumberSettingField
 import io.github.c0dewars.pvcalculator.ui.components.PickerField
 import io.github.c0dewars.pvcalculator.ui.components.SectionCard
+import io.github.c0dewars.pvcalculator.ui.theme.ThemeMode
+import io.github.c0dewars.pvcalculator.ui.theme.themeModeOf
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Currency
@@ -190,6 +197,7 @@ fun SettingsScreen(vm: AppViewModel, data: AppData, fmt: Formatter, snackbar: Sn
 
             // --------------------------------------------------------- general
             SectionCard(title = stringResource(R.string.section_general), icon = Icons.Rounded.Language) {
+                ThemeSelector(themeModeOf(data.themeMode)) { vm.setThemeMode(it.name) }
                 CurrencyPicker(data.currencyCode ?: AppViewModel.defaultCurrency()) { vm.setCurrency(it) }
             }
 
@@ -280,6 +288,32 @@ private fun SelfConsumptionSlider(value: Double, onValue: (Double) -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+private fun ThemeSelector(selected: ThemeMode, onSelect: (ThemeMode) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.DarkMode, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.theme), style = MaterialTheme.typography.bodyLarge)
+        }
+        val options = listOf(
+            ThemeMode.SYSTEM to R.string.theme_system,
+            ThemeMode.LIGHT to R.string.theme_light,
+            ThemeMode.DARK to R.string.theme_dark,
+        )
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            options.forEachIndexed { i, (mode, label) ->
+                SegmentedButton(
+                    selected = selected == mode,
+                    onClick = { onSelect(mode) },
+                    shape = SegmentedButtonDefaults.itemShape(i, options.size),
+                        colors = pvSegmentedColors(),
+                ) { Text(stringResource(label), maxLines = 1) }
+            }
+        }
     }
 }
 

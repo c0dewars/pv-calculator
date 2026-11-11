@@ -177,6 +177,10 @@
     <string name="degradation_hint">Os painéis perdem tipicamente 0,4–0,7% por ano</string>
     <string name="percent_per_year" formatted="false">%/ano</string>
     <string name="section_general">Geral</string>
+    <string name="theme">Aspeto</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
     <string name="currency">Moeda</string>
     <string name="section_data">Os seus dados</string>
     <string name="privacy_note">Não precisa de conta. Tudo fica neste telemóvel, incluindo faturas e screenshots. A única ligação à internet é a sincronização opcional com a DeyeCloud. Faça uma cópia de segurança antes de trocar de telemóvel.</string>

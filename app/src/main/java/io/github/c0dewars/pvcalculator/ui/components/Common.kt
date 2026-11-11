@@ -439,3 +439,10 @@ fun AttachButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier:
         Text(text)
     }
 }
+
+/** Segmented buttons use the app's orange accent (instead of the default green) when selected. */
+@Composable
+fun pvSegmentedColors() = androidx.compose.material3.SegmentedButtonDefaults.colors(
+    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+)

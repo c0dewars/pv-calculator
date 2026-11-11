@@ -114,4 +114,29 @@ class ScreenshotTest {
         compose.mainClock.advanceTimeBy(1000)
         save("5-deye-section")
     }
+
+    @Test
+    fun darkScreens() {
+        val repo = DataRepository.get(ApplicationProvider.getApplicationContext())
+        kotlinx.coroutines.runBlocking { repo.update { sampleData().copy(themeMode = "DARK") } }
+
+        compose.setContent { PvTheme(darkTheme = true) { PvApp() } }
+        compose.waitForIdle()
+        compose.mainClock.advanceTimeBy(2000)
+        save("dark-1-overview")
+
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Cumulative savings"))
+        compose.mainClock.advanceTimeBy(1500)
+        save("dark-2-payback")
+
+        compose.onNodeWithText("Production").performClick()
+        compose.mainClock.advanceTimeBy(1000)
+        save("dark-3-production")
+
+        compose.onNodeWithText("Settings").performClick()
+        compose.mainClock.advanceTimeBy(1000)
+        compose.onAllNodes(hasScrollAction())[0].performScrollToNode(hasText("Appearance"))
+        compose.mainClock.advanceTimeBy(1000)
+        save("dark-4-settings")
+    }
 }

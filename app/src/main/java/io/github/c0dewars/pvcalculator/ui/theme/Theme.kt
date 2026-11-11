@@ -8,6 +8,8 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -62,16 +64,35 @@ private val Dark = darkColorScheme(
     surfaceVariant = Color(0xFF52443B),
     onSurfaceVariant = Color(0xFFD8C2B5),
     surfaceContainerLowest = Color(0xFF130D08),
-    surfaceContainerLow = Color(0xFF221A14),
-    surfaceContainer = Color(0xFF261E18),
-    surfaceContainerHigh = Color(0xFF312822),
-    surfaceContainerHighest = Color(0xFF3C332C),
+    // Cards a bit lighter than the background so they stand out in the dark.
+    surfaceContainerLow = Color(0xFF261D16),
+    surfaceContainer = Color(0xFF2B221B),
+    surfaceContainerHigh = Color(0xFF362C25),
+    surfaceContainerHighest = Color(0xFF41372F),
     outline = Color(0xFFA08D82),
     outlineVariant = Color(0xFF52443B),
 )
 
 /** Warm sunrise gradient used on the hero card. */
 val SunGradient = Brush.linearGradient(listOf(Color(0xFFFFB13B), Color(0xFFF57C00), Color(0xFFD84315)))
+
+/** Deeper version for dark mode: less glare, white text stays readable. */
+val SunGradientDark = Brush.linearGradient(listOf(Color(0xFFD9822B), Color(0xFFB8520F), Color(0xFF8C2F12)))
+
+/** True when the app is drawn with the dark color scheme. */
+val LocalDarkTheme = staticCompositionLocalOf { false }
+
+/** Theme preference stored in the app data. */
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+@Composable
+fun ThemeMode.isDark(): Boolean = when (this) {
+    ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
+}
+
+fun themeModeOf(value: String?): ThemeMode = ThemeMode.entries.firstOrNull { it.name == value } ?: ThemeMode.SYSTEM
 
 /** Colours used in charts and breakdowns, readable on both themes. */
 object PvColors {
@@ -102,10 +123,12 @@ private val AppShapes = Shapes(
 
 @Composable
 fun PvTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) Dark else Light,
-        typography = AppTypography,
-        shapes = AppShapes,
-        content = content,
-    )
+    CompositionLocalProvider(LocalDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) Dark else Light,
+            typography = AppTypography,
+            shapes = AppShapes,
+            content = content,
+        )
+    }
 }
