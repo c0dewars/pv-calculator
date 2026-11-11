@@ -12,7 +12,19 @@ import io.github.c0dewars.pvcalculator.domain.DeyeTokenResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import io.github.c0dewars.pvcalculator.domain.DeyeBatteryConfig
+import io.github.c0dewars.pvcalculator.domain.DeyeDevice
+import io.github.c0dewars.pvcalculator.domain.DeyeDeviceListResponse
+import io.github.c0dewars.pvcalculator.domain.DeyeDynamicConfig
+import io.github.c0dewars.pvcalculator.domain.DeyeOrderResponse
+import io.github.c0dewars.pvcalculator.domain.DeyeOrderStatus
+import io.github.c0dewars.pvcalculator.domain.DeyeStationLatest
+import io.github.c0dewars.pvcalculator.domain.DeyeSystemConfig
+import io.github.c0dewars.pvcalculator.domain.DeyeTouConfig
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.io.IOException
@@ -68,20 +80,111 @@ class DeyeCloudClient(private val dataCenter: DeyeDataCenter) {
         return r.stationDataItems
     }
 
-    private suspend fun post(path: String, body: JsonObject, token: String?): String = withContext(Dispatchers.IO) {
+    // ------------------------------------------------------------------ inverter (hybrid + battery)
+
+    /** Devices of a station; the hybrid inverter is the one with deviceType INVERTER. */
+    suspend fun devices(token: String, stationId: Long): List<DeyeDevice> {
+        val body = buildJsonObject {
+            put("page", 1)
+            put("size", 50)
+            put("stationIds", buildJsonArray { add(stationId) })
+        }
+        val r = DeyeSync.json.decodeFromString(DeyeDeviceListResponse.serializer(), post("/v1.0/station/device", body, token))
+        DeyeSync.check(r.success, r.code, r.msg)
+        return r.deviceListItems
+    }
+
+    suspend fun stationLatest(token: String, stationId: Long): DeyeStationLatest {
+        val r = DeyeSync.json.decodeFromString(
+            DeyeStationLatest.serializer(),
+            post("/v1.0/station/latest", buildJsonObject { put("stationId", stationId) }, token),
+        )
+        DeyeSync.check(r.success, r.code, r.msg)
+        return r
+    }
+
+    suspend fun batteryConfig(token: String, deviceSn: String): DeyeBatteryConfig {
+        val r = DeyeSync.json.decodeFromString(DeyeBatteryConfig.serializer(), post("/v1.0/config/battery", sn(deviceSn), token))
+        DeyeSync.check(r.success, r.code, r.msg)
+        return r
+    }
+
+    suspend fun systemConfig(token: String, deviceSn: String): DeyeSystemConfig {
+        val r = DeyeSync.json.decodeFromString(DeyeSystemConfig.serializer(), post("/v1.0/config/system", sn(deviceSn), token))
+        DeyeSync.check(r.success, r.code, r.msg)
+        return r
+    }
+
+    suspend fun touConfig(token: String, deviceSn: String): DeyeTouConfig {
+        val r = DeyeSync.json.decodeFromString(DeyeTouConfig.serializer(), post("/v1.0/config/tou", sn(deviceSn), token))
+        DeyeSync.check(r.success, r.code, r.msg)
+        return r
+    }
+
+    /**
+     * Reads the full dynamic-control state (grid charge on/off, current, TOU...). The inverter answers
+     * asynchronously, so this sends a read order and polls its result for up to [timeoutMs].
+     */
+    suspend fun dynamicConfig(token: String, deviceSn: String, timeoutMs: Long = 45_000): DeyeDynamicConfig? {
+        val order = DeyeSync.json.decodeFromString(
+            DeyeOrderResponse.serializer(),
+            post("/v1.0/strategy/dynamicControl/read", sn(deviceSn), token),
+        )
+        DeyeSync.check(order.success, order.code, order.msg)
+        val orderId = order.orderId ?: return null
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            delay(3000)
+            val text = post("/v1.0/strategy/dynamicControl/readResult", buildJsonObject { put("orderId", orderId) }, token)
+            val r = runCatching { DeyeSync.json.decodeFromString(DeyeDynamicConfig.serializer(), text) }.getOrNull() ?: continue
+            if (r.success && (r.gridChargeAction != null || r.timeUseSettingItems != null || r.workMode != null)) return r
+        }
+        return null
+    }
+
+    /**
+     * Sends a dynamic-control command. Only the given fields change on the inverter; everything else
+     * keeps its value. Returns the order id to follow with [waitForOrder].
+     */
+    suspend fun dynamicControl(token: String, deviceSn: String, fields: JsonObject): Long {
+        val body = JsonObject(mapOf("deviceSn" to JsonPrimitive(deviceSn)) + fields)
+        val r = DeyeSync.json.decodeFromString(DeyeOrderResponse.serializer(), post("/v1.0/strategy/dynamicControl", body, token))
+        DeyeSync.check(r.success, r.code, r.msg)
+        return r.orderId ?: throw DeyeApiException(r.msg ?: "No order id")
+    }
+
+    /** Polls a command until the inverter reports success or failure (or [timeoutMs] passes). */
+    suspend fun waitForOrder(token: String, orderId: Long, timeoutMs: Long = 90_000): DeyeOrderStatus? {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        var last: DeyeOrderStatus? = null
+        while (System.currentTimeMillis() < deadline) {
+            delay(3000)
+            last = runCatching {
+                DeyeSync.json.decodeFromString(DeyeOrderStatus.serializer(), request("GET", "/v1.0/order/$orderId", null, token))
+            }.getOrNull() ?: last
+            if (last?.isDone == true) return last
+        }
+        return last
+    }
+
+    private fun sn(deviceSn: String) = buildJsonObject { put("deviceSn", deviceSn) }
+
+    private suspend fun post(path: String, body: JsonObject, token: String?): String = request("POST", path, body, token)
+
+    private suspend fun request(method: String, path: String, body: JsonObject?, token: String?): String = withContext(Dispatchers.IO) {
         var attempt = 0
         while (true) {
             val conn = (URL(dataCenter.baseUrl + path).openConnection() as HttpURLConnection).apply {
-                requestMethod = "POST"
+                requestMethod = method
                 connectTimeout = 20_000
                 readTimeout = 30_000
-                doOutput = true
+                doOutput = body != null
                 setRequestProperty("Content-Type", "application/json")
                 setRequestProperty("Accept", "application/json")
                 if (token != null) setRequestProperty("Authorization", "bearer $token")
             }
             try {
-                conn.outputStream.use { it.write(body.toString().toByteArray()) }
+                if (body != null) conn.outputStream.use { it.write(body.toString().toByteArray()) }
                 val status = conn.responseCode
                 // Rate limited or temporary server error: back off and retry a couple of times.
                 if ((status == 429 || status >= 500) && attempt < 2) {

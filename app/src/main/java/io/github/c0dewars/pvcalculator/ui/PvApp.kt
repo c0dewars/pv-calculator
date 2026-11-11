@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
+import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.WbSunny
@@ -44,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.c0dewars.pvcalculator.R
 import io.github.c0dewars.pvcalculator.ui.components.rememberFormatter
+import io.github.c0dewars.pvcalculator.ui.screens.BatteryScreen
 import io.github.c0dewars.pvcalculator.ui.screens.BillsScreen
 import io.github.c0dewars.pvcalculator.ui.screens.OverviewScreen
 import io.github.c0dewars.pvcalculator.ui.screens.ProductionScreen
@@ -53,6 +55,7 @@ enum class Tab(val title: Int, val icon: ImageVector) {
     Overview(R.string.tab_overview, Icons.Rounded.Insights),
     Production(R.string.tab_production, Icons.Rounded.WbSunny),
     Bills(R.string.tab_bills, Icons.AutoMirrored.Rounded.ReceiptLong),
+    Battery(R.string.tab_battery, Icons.Rounded.BatteryChargingFull),
     Settings(R.string.tab_settings, Icons.Rounded.Settings),
 }
 
@@ -94,6 +97,7 @@ fun PvApp(vm: AppViewModel = viewModel()) {
                     Tab.Overview -> OverviewScreen(summary, data, fmt, snackbar, onOpenSettings = { tab = Tab.Settings }, onOpenProduction = { tab = Tab.Production })
                     Tab.Production -> ProductionScreen(vm, data, fmt, snackbar)
                     Tab.Bills -> BillsScreen(vm, data, fmt, snackbar)
+                    Tab.Battery -> BatteryScreen(vm, data, snackbar, onOpenSettings = { tab = Tab.Settings })
                     Tab.Settings -> SettingsScreen(vm, data, fmt, snackbar)
                 }
             }
