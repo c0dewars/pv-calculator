@@ -68,7 +68,7 @@ Time between the installation date and your first record is estimated.
 
 ## Install
 
-Download the APK from the [Releases](../../releases) page (or from the latest *Android build* run in the Actions tab):
+Download the APK from the [Releases](../../releases) page:
 
 - `app-arm64-v8a-release.apk`: most phones from the last ~8 years
 - `app-universal-release.apk`: works on every device (bigger)
@@ -87,9 +87,10 @@ Requirements: JDK 17+ and the Android SDK (API 35).
 Release builds are signed with your own key when these environment variables are set:
 `PV_KEYSTORE_FILE`, `PV_KEYSTORE_PASSWORD`, `PV_KEY_ALIAS`, `PV_KEY_PASSWORD`. Otherwise they use the debug key.
 
-In GitHub Actions, the key comes from the repository secrets `PV_KEYSTORE_BASE64` (the `.jks` file in base64),
+In GitHub Actions, publishing a release requires the repository secrets `PV_KEYSTORE_BASE64` (the `.jks` file in base64),
 `PV_KEYSTORE_PASSWORD`, `PV_KEY_ALIAS` and `PV_KEY_PASSWORD`. Every release must be signed with the same key,
 otherwise Android refuses to update an installed app. Keep a backup of the keystore and its password.
+When signing secrets are unavailable, the workflow builds debug-signed test APKs as Actions artifacts and skips publishing a release.
 
 ### Project layout
 
