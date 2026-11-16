@@ -109,14 +109,6 @@ Bills and screenshots are processed on the device (PDF text extraction with PdfB
 ML Kit's bundled on-device model) and never leave it. The app's own network traffic is only the optional DeyeCloud sync,
 directly between your phone and DeyeCloud. Note that the ML Kit library may send anonymous diagnostics to Google.
 
----
-
-### 🇵🇹 Em português
-
-A **Calculadora PV** calcula quanto poupa por mês com os painéis solares, a partir das faturas de eletricidade e da
-produção diária. Também estima ao fim de quantos anos o investimento fica pago. Importe as faturas em PDF e os
-screenshots da app do inversor e os valores são lidos automaticamente. Não precisa de conta e os dados ficam no telemóvel.
-
 ## License
 
 [MIT](LICENSE)
